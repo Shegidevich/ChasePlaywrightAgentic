@@ -60,20 +60,11 @@ export class HomePage {
 
   /** Open the dropdown for a top-level menu item. */
   async openMenu(name: string): Promise<void> {
-    // These menus open on hover. A real mouse click after hover toggles the
-    // menu closed, so prefer hover. Fall back to a DOM click scoped to the
-    // main menubar if hover does not expand the item (e.g. touch-only paths).
     const item = this.menuItem(name);
     await item.waitFor({ state: 'visible' });
-    await item.hover();
-
-    if ((await item.getAttribute('aria-expanded')) !== 'true') {
-      const ptName = HomePage.MENU_PT_NAMES[name];
-      await this.mainMenu.locator(`button[data-pt-name="${ptName}"]`).evaluate((btn) => {
-        (btn as HTMLElement).click();
-      });
-    }
-
+    // Playwright click is enough: it targets the menubar button and leaves
+    // the dropdown open (no evaluate/DOM click needed).
+    await item.click();
     await expect(item).toHaveAttribute('aria-expanded', 'true');
   }
 
