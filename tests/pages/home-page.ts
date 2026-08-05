@@ -62,9 +62,15 @@ export class HomePage {
   async openMenu(name: string): Promise<void> {
     const item = this.menuItem(name);
     await item.waitFor({ state: 'visible' });
-    // Playwright click is enough: it targets the menubar button and leaves
-    // the dropdown open (no evaluate/DOM click needed).
+    // Click the menu item and retry if aria-expanded doesn't become true.
+    // The Chase menu sometimes ignores the first click due to dynamic
+    // initialization or overlay transitions.
     await item.click();
+    const isExpanded = await item.getAttribute('aria-expanded');
+    if (isExpanded !== 'true') {
+      // Retry the click once after a short wait
+      await item.click({ force: true });
+    }
     await expect(item).toHaveAttribute('aria-expanded', 'true');
   }
 
