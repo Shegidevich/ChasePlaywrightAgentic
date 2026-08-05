@@ -42,6 +42,9 @@ export class HomePage {
   async goto(): Promise<void> {
     await this.page.goto('https://www.chase.com/');
     await expect(this.page).toHaveTitle(/Chase/);
+    // Dismiss the privacy/cookie consent banner if it appears
+    const closeBtn = this.page.locator('button').filter({ has: this.page.locator('img[alt="Close Icon"]') });
+    await closeBtn.first().click({ timeout: 3000 }).catch(() => {});
   }
 
   /** The top-level menu item locator for a given name. */
